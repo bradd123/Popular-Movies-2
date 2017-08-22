@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         rvMovies.setAdapter(rvAdapter);
 
         rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
+//        rvMovies.setNestedScrollingEnabled(false);
 
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
