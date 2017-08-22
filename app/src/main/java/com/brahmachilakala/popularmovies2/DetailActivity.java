@@ -11,8 +11,10 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -33,7 +35,7 @@ public class DetailActivity extends AppCompatActivity {
     private TextView tvMovieYear;
     private TextView tvMovieDuration;
     private TextView tvMovieRating;
-    private TextView btFavorite;
+    private Button btFavorite;
     private TextView tvMovieOverview;
 
     int id;
@@ -44,6 +46,7 @@ public class DetailActivity extends AppCompatActivity {
     RecyclerView rvReviews;
     ReviewsAdapter mReviewsAdapter;
     ArrayList<Review> mReviews;
+    boolean isFavorite = false;
 
     String baseVideoUrl = "https://www.youtube.com/watch?v=";
 
@@ -57,6 +60,23 @@ public class DetailActivity extends AppCompatActivity {
         tvMovieYear = (TextView) findViewById(R.id.tv_movie_year);
         tvMovieRating = (TextView) findViewById(R.id.tv_movie_rating);
         tvMovieOverview = (TextView) findViewById(R.id.tv_movie_overview);
+        btFavorite = (Button) findViewById(R.id.bt_favorite);
+
+        btFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (isFavorite) {
+                    isFavorite = false;
+                    btFavorite.setText("Mark As Favorite");
+                    Toast.makeText(DetailActivity.this, "marked it as unfavorite", Toast.LENGTH_SHORT).show();
+                } else {
+                    isFavorite = true;
+                    btFavorite.setText("Favorited");
+                    Toast.makeText(DetailActivity.this, "marked it as favorite", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         id = getIntent().getIntExtra("id", 100);
         tvMovieTitle.setText(getIntent().getStringExtra("original_title"));
@@ -64,6 +84,11 @@ public class DetailActivity extends AppCompatActivity {
         tvMovieOverview.setText(getIntent().getStringExtra("overview"));
         tvMovieYear.setText(getIntent().getStringExtra("release_date"));
         tvMovieRating.setText(getIntent().getStringExtra("user_rating"));
+        isFavorite = getIntent().getBooleanExtra("is_favorite", false);
+
+        if (isFavorite) {
+            btFavorite.setText("Favorited");
+        }
 
         getVideos();
         getReviews();

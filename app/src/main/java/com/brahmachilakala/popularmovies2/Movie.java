@@ -17,6 +17,7 @@ public class Movie {
     private String overview;
     private String userRating;
     private String releaseDate;
+    private boolean isFavorite = false;
 
     public int getId() {
         return id;
@@ -44,6 +45,14 @@ public class Movie {
 
     public String getReleaseDate() {
         return releaseDate;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setAsFavorite(boolean fav) {
+        isFavorite = fav;
     }
 
     public static Movie fromJson(JSONObject json) {

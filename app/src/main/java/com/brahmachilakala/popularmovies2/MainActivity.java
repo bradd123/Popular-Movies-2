@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     detailActivity.putExtra("overview", movie.getOverview());
                     detailActivity.putExtra("user_rating", movie.getUserRating());
                     detailActivity.putExtra("release_date", movie.getReleaseDate());
+                    detailActivity.putExtra("is_favorite", movie.isFavorite());
                     startActivity(detailActivity);
 
                     return true;
