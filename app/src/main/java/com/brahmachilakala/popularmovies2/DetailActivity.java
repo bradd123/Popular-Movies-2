@@ -41,6 +41,9 @@ public class DetailActivity extends AppCompatActivity {
     RecyclerView rvVideos;
     VideosAdapter mVideosAdapter;
     GestureDetector mGestureDetector;
+    RecyclerView rvReviews;
+    ReviewsAdapter mReviewsAdapter;
+    ArrayList<Review> mReviews;
 
     String baseVideoUrl = "https://www.youtube.com/watch?v=";
 
@@ -63,11 +66,16 @@ public class DetailActivity extends AppCompatActivity {
         tvMovieRating.setText(getIntent().getStringExtra("user_rating"));
 
         getVideos();
+        getReviews();
 
     }
 
     private void getVideos() {
         new VideosTask().execute("https://api.themoviedb.org/3/movie/" + id + "/videos?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+    }
+
+    private void getReviews() {
+        new ReviewsTask().execute("https://api.themoviedb.org/3/movie/" + id + "/reviews?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
     }
 
     private void showVideosInRecyclerView() {
@@ -111,6 +119,14 @@ public class DetailActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showReviews() {
+        rvReviews = (RecyclerView) findViewById(R.id.rvReviews);
+
+        mReviewsAdapter = new ReviewsAdapter(mReviews);
+        rvReviews.setAdapter(mReviewsAdapter);
+        rvReviews.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private class VideosTask extends AsyncTask<String, Void, String> {
@@ -157,6 +173,48 @@ public class DetailActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 Log.i("DetailActivity", "Error in parsing the JSON" + e.getMessage());
+            }
+        }
+    }
+
+    private class ReviewsTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                URL url = new URL(strings[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.connect();
+                InputStream in = conn.getInputStream();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+
+                return stringBuilder.toString();
+
+
+            } catch (Exception e) {
+                Log.i("DetailActivity", "Error in parsing reviews URL " + e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            try {
+                JSONObject jsonObject = new JSONObject(s);
+                mReviews = Review.fromJson(jsonObject.getJSONArray("results"));
+
+                showReviews();
+            } catch (Exception e) {
+                Log.i("DetailActivity", "Error in parsing JSON " + e.getMessage());
             }
         }
     }
