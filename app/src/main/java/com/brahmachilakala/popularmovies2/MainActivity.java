@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
             if (sortOrder.equals("favorite")) {
                 Toast.makeText(this, "favorite clicked", Toast.LENGTH_SHORT).show();
+                getFavoriteMovies();
             } else {
                 new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/" + sortOrder + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
             }
@@ -147,6 +148,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 JSONObject response = new JSONObject(s);
 
                 JSONArray moviesArray = response.getJSONArray("results");
+
+                if (movies != null) {
+                    movies.clear();
+                }
 
                 movies = Movie.fromJson(moviesArray);
 
@@ -236,6 +241,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         }
 
+        if (movies != null) {
+            movies.clear();
+        }
+
+        Log.i("MainActivity", "size of the movie ids = " + movieIds.size());
+
         for(int j=0; j<movieIds.size(); j++) {
             int movieId = movieIds.get(j);
             new MovieTask().execute("https://api.themoviedb.org/3/movie/" + movieId + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
@@ -290,6 +301,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
                 Movie movie = Movie.fromJson(jsonObject);
                 movie.setAsFavorite(true);
+                if (movies == null) {
+                    movies = new ArrayList<>();
+                }
                 movies.add(movie);
 
                 if (movies.size() == favoriteMoviesCount) {
