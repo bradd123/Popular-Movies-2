@@ -1,6 +1,8 @@
 package com.brahmachilakala.popularmovies2;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brahmachilakala.popularmovies2.data.MovieContract;
+import com.brahmachilakala.popularmovies2.data.MovieDbHelper;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -50,10 +54,15 @@ public class DetailActivity extends AppCompatActivity {
 
     String baseVideoUrl = "https://www.youtube.com/watch?v=";
 
+    private SQLiteDatabase mDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        MovieDbHelper dbHelper = new MovieDbHelper(this);
+        mDb = dbHelper.getWritableDatabase();
 
         tvMovieTitle = (TextView) findViewById(R.id.tv_movie_title);
         ivMovieThumbnail = (ImageView) findViewById(R.id.iv_movie_thumbnail);
@@ -70,10 +79,13 @@ public class DetailActivity extends AppCompatActivity {
                     isFavorite = false;
                     btFavorite.setText("Mark As Favorite");
                     Toast.makeText(DetailActivity.this, "marked it as unfavorite", Toast.LENGTH_SHORT).show();
+                    removeMovieFromFavorites(id);
+
                 } else {
                     isFavorite = true;
                     btFavorite.setText("Favorited");
                     Toast.makeText(DetailActivity.this, "marked it as favorite", Toast.LENGTH_SHORT).show();
+                    insertNewFavoriteMovie(id, tvMovieTitle.getText().toString());
                 }
             }
         });
@@ -93,6 +105,17 @@ public class DetailActivity extends AppCompatActivity {
         getVideos();
         getReviews();
 
+    }
+
+    private boolean removeMovieFromFavorites(int id) {
+        return mDb.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=" + id, null) > 0;
+    }
+
+    private long insertNewFavoriteMovie(int id, String title) {
+        ContentValues cv = new ContentValues();
+        cv.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+        cv.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, title);
+        return mDb.insert(MovieContract.MovieEntry.TABLE_NAME, null, cv);
     }
 
     private void getVideos() {

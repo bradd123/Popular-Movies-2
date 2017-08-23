@@ -3,9 +3,11 @@
     <array name="pref_sort_option_labels">
         <item>Popular</item>
         <item>Top Rated</item>
+        <item>Favorite</item>
     </array>
     <array name="pref_sort_option_values">
         <item>popular</item>
         <item>top_rated</item>
+        <item>favorite</item>
     </array>
 </resources>

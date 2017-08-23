@@ -20,8 +20,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.brahmachilakala.popularmovies2.data.MovieContract;
+import com.brahmachilakala.popularmovies2.data.MovieDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     String sortOrder = "popular";
 
     private SQLiteDatabase mDb;
+    private int favoriteMoviesCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,10 +104,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         if (isNetworkAvailable()) {
 
-            if (sortOrder.equals("popular")) {
-                new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/popular?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+            if (sortOrder.equals("favorite")) {
+                Toast.makeText(this, "favorite clicked", Toast.LENGTH_SHORT).show();
             } else {
-                new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/top_rated?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+                new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/" + sortOrder + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
             }
         }
     }
@@ -217,7 +220,30 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
-    private Cursor getFavoriteMovies() {
+    private void getFavoriteMovies() {
+        MovieDbHelper dbHelper = new MovieDbHelper(this);
+        mDb = dbHelper.getWritableDatabase();
+        Cursor cursor = getDbCursor();
+        favoriteMoviesCount = cursor.getCount();
+        ArrayList<Integer> movieIds = new ArrayList<>();
+
+        if (favoriteMoviesCount == 0) {
+            Toast.makeText(this, "No favorite movies", Toast.LENGTH_SHORT).show();
+        } else {
+            for (int i=0; i<cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                movieIds.add(cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID)));
+            }
+        }
+
+        for(int j=0; j<movieIds.size(); j++) {
+            int movieId = movieIds.get(j);
+            new MovieTask().execute("https://api.themoviedb.org/3/movie/" + movieId + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+        }
+
+    }
+
+    private Cursor getDbCursor() {
         return mDb.query(
                 MovieContract.MovieEntry.TABLE_NAME,
                 null,
@@ -227,5 +253,51 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 null,
                 MovieContract.MovieEntry.COLUMN_MOVIE_ID
         );
+    }
+
+    private class MovieTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                URL url = new URL(strings[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.connect();
+                InputStream in = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+
+                return stringBuilder.toString();
+
+            } catch (Exception e) {
+                Log.i("MainActivity", "Error in parsing MoviesTask URL " + e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            try {
+                JSONObject jsonObject = new JSONObject(s);
+
+                Movie movie = Movie.fromJson(jsonObject);
+                movie.setAsFavorite(true);
+                movies.add(movie);
+
+                if (movies.size() == favoriteMoviesCount) {
+                    runRecyclerView();
+                }
+            } catch (Exception e) {
+                Log.i("MainActivity", "Error in parsing MoviesTask JSON " + e.getMessage());
+            }
+        }
     }
 }
