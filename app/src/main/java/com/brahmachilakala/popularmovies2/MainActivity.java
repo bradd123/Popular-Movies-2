@@ -3,6 +3,8 @@ package com.brahmachilakala.popularmovies2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -18,6 +20,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.brahmachilakala.popularmovies2.data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     GestureDetector mGestureDetector;
 
     String sortOrder = "popular";
+
+    private SQLiteDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,5 +215,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    private Cursor getFavoriteMovies() {
+        return mDb.query(
+                MovieContract.MovieEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                MovieContract.MovieEntry.COLUMN_MOVIE_ID
+        );
     }
 }
