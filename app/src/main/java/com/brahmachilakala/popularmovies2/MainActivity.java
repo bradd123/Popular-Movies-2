@@ -37,6 +37,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
+    private static String LOG_TAG = MainActivity.class.getSimpleName();
+
     ArrayList<Movie> movies;
     RecyclerView rvMovies;
     MoviesAdapter rvAdapter;
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
 
             } catch (Exception e) {
-                Log.i("MainActivity", "error in parsing the url" + e.getMessage());
+                Log.i(LOG_TAG, "error in parsing the url" + e.getMessage());
                 return null;
             }
         }
@@ -245,8 +247,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             movies.clear();
         }
 
-        Log.i("MainActivity", "size of the movie ids = " + movieIds.size());
-
         for(int j=0; j<movieIds.size(); j++) {
             int movieId = movieIds.get(j);
             new MovieTask().execute("https://api.themoviedb.org/3/movie/" + movieId + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 return stringBuilder.toString();
 
             } catch (Exception e) {
-                Log.i("MainActivity", "Error in parsing MoviesTask URL " + e.getMessage());
+                Log.i(LOG_TAG, "Error in parsing MoviesTask URL " + e.getMessage());
                 return null;
             }
         }
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     runRecyclerView();
                 }
             } catch (Exception e) {
-                Log.i("MainActivity", "Error in parsing MoviesTask JSON " + e.getMessage());
+                Log.i(LOG_TAG, "Error in parsing MoviesTask JSON " + e.getMessage());
             }
         }
     }
