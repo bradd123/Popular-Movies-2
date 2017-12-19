@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 Toast.makeText(this, "favorite clicked", Toast.LENGTH_SHORT).show();
                 getFavoriteMovies();
             } else {
-                new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/" + sortOrder + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+                new GetMoviesTask().execute("https://api.themoviedb.org/3/movie/" + sortOrder + "?api_key=ENTER_API_KEY_HERE");
             }
         }
     }
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         for(int j=0; j<movieIds.size(); j++) {
             int movieId = movieIds.get(j);
-            new MovieTask().execute("https://api.themoviedb.org/3/movie/" + movieId + "?api_key=3afb8ecfbf45f15fa5dc9463f48976ed");
+            new MovieTask().execute("https://api.themoviedb.org/3/movie/" + movieId + "?api_key=ENTER_API_KEY_HERE");
         }
 
     }
